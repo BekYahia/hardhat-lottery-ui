@@ -1,9 +1,6 @@
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
 import AppHeader from '@/components/Header'
-
-const inter = Inter({ subsets: ['latin'] })
+import LotteryEntrance from '@/components/LotteryEntrance'
 
 export default function Home() {
   return (
@@ -16,8 +13,8 @@ export default function Home() {
 
       <AppHeader />
 
-      <main className={`${styles.main} ${inter.className}`}>
-        <h2>Main</h2>
+      <main className="max-w-screen-md mx-auto">
+        <LotteryEntrance />
       </main>
     </>
   )
