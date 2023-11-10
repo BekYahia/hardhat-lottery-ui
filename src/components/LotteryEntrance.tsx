@@ -3,8 +3,6 @@ import { abi, contractAddress } from "@/constants"
 import { useEffect, useState } from "react"
 import { useNotification } from "@web3uikit/core"
 import { Bell } from "@web3uikit/icons"
-import { BigNumberish } from "ethers"
-
 import Button from "@/components/Button"
 import ListItem from "@/components/ListItem"
 
@@ -26,12 +24,11 @@ export default function LotteryEntrance() {
     const [recentWinner, setRecentWinner] = useState("")
     const [raffleState, setRaffleState] = useState(0)
     const [raffleBalance, setRaffleBalance] = useState("0")
- 
+
     useEffect(() => {
-        if(!isWeb3Enabled) return
+        if(!isWeb3Enabled || !raffleAddress) return
         updateUI()
-        
-    }, [isWeb3Enabled])
+    }, [isWeb3Enabled, chainId])
 
     /* View Functions */
     const contractAttributes = {
@@ -82,15 +79,12 @@ export default function LotteryEntrance() {
             position: "topR",
             title: "Raffle Entrance",
             icon: <Bell />,
-            isClosing: !!false,
             ...args,
         })
     }
     async function updateUI() {    
         setEntranceFee((await getEntranceFee())?.toString()!)
-        setNumberOfPlayers((await getNumberOfPlayers() as BigNumberish).toString())
-        setRecentWinner(await getRecentWinner() as string)
-        setRecentWinner(await getRecentWinner() as string)
+        setNumberOfPlayers((await getNumberOfPlayers())!.toString())
         setRecentWinner(await getRecentWinner() as string)
         setRaffleState(await getRaffleState() as number)
         web3?.getBalance(raffleAddress!).then(acc => setRaffleBalance(acc.toString()))
@@ -102,8 +96,8 @@ export default function LotteryEntrance() {
                 <ul>
                     <ListItem name="chainID" value={chainId} />
                     <ListItem name="raffle address" value={raffleAddress} />
-                    <ListItem name="entrance fee" value={`${Moralis.Units.FromWei(entranceFee)}ETH`} />
                     <ListItem name="raffle balance" value={`${Moralis.Units.FromWei(raffleBalance)}ETH`} />
+                    <ListItem name="entrance fee" value={`${Moralis.Units.FromWei(entranceFee)}ETH`} />
                     <ListItem name="total players" value={numberOfPlayers} />
                     <ListItem name="recent winner" value={recentWinner} />
                     <ListItem name="raffle state" value={raffleState === 0 ? "Open" : "Calculating"} />
@@ -121,7 +115,7 @@ export default function LotteryEntrance() {
                     })
                 }} />
             </>)
-        : <p> No Raffle Address </p>}
+        : <p> Not supported Network <code className="font-semibold">{chainIdHex && parseInt(chainIdHex!)}</code>, use <code className="font-semibold">{ Object.keys(addresses) }</code> instead. </p>}
     </div>
 }
 
