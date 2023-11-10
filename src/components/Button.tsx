@@ -1,19 +1,17 @@
-import { title } from "process";
-import { ButtonHTMLAttributes, HtmlHTMLAttributes, ReactNode } from "react";
+import { ButtonHTMLAttributes, ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children?: ReactNode,
     loading?: boolean,
     title?: string,
 }
-export default function Button({ children, ...attributes }: ButtonProps) {
+export default function Button({ children, loading = false, ...attributes} : ButtonProps) {
     return <button
         className="bg-blue-500 hover:bg-blue-600 focus:ring-4 disabled:bg-blue-300 disabled:cursor-not-allowed text-white text-lg rounded-md p-2 px-4 flex items-center"
-        loading={attributes.loading}
-        disabled={attributes.loading}
+        disabled={loading}
         {...attributes}
     >
-        {attributes.loading && <LoadingIcon />}
+        {loading && <LoadingIcon />}
         {children}
         <span>{ attributes.title }</span>
     </button>
