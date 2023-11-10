@@ -2,7 +2,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis"
 import { abi, contractAddress } from "@/constants"
 import { useEffect, useState } from "react"
 import { useNotification } from "@web3uikit/core"
-import { Bell, Info } from "@web3uikit/icons"
+import { Bell } from "@web3uikit/icons"
 import { BigNumberish } from "ethers"
 
 import Button from "@/components/Button"
@@ -14,7 +14,7 @@ interface ContractAddress {
 
 export default function LotteryEntrance() {
     /* Hooks */
-    const { chainId: chainIdHex, isWeb3Enabled, Moralis } = useMoralis()
+    const { chainId: chainIdHex, isWeb3Enabled, Moralis, web3 } = useMoralis()
     const dispatch = useNotification()
 
     const chainId = parseInt(chainIdHex!)
@@ -24,12 +24,13 @@ export default function LotteryEntrance() {
     const [entranceFee, setEntranceFee] = useState("0")
     const [numberOfPlayers, setNumberOfPlayers] = useState("0")
     const [recentWinner, setRecentWinner] = useState("")
-    const [raffleState, setRaffleState] = useState(5)
-
+    const [raffleState, setRaffleState] = useState(0)
+    const [raffleBalance, setRaffleBalance] = useState("0")
+ 
     useEffect(() => {
         if(!isWeb3Enabled) return
         updateUI()
-
+        
     }, [isWeb3Enabled])
 
     /* View Functions */
@@ -92,6 +93,7 @@ export default function LotteryEntrance() {
         setRecentWinner(await getRecentWinner() as string)
         setRecentWinner(await getRecentWinner() as string)
         setRaffleState(await getRaffleState() as number)
+        web3?.getBalance(raffleAddress!).then(acc => setRaffleBalance(acc.toString()))
     }
 
     return <div className="font-sans">
@@ -101,6 +103,7 @@ export default function LotteryEntrance() {
                     <ListItem name="chainID" value={chainId} />
                     <ListItem name="raffle address" value={raffleAddress} />
                     <ListItem name="entrance fee" value={`${Moralis.Units.FromWei(entranceFee)}ETH`} />
+                    <ListItem name="raffle balance" value={`${Moralis.Units.FromWei(raffleBalance)}ETH`} />
                     <ListItem name="total players" value={numberOfPlayers} />
                     <ListItem name="recent winner" value={recentWinner} />
                     <ListItem name="raffle state" value={raffleState === 0 ? "Open" : "Calculating"} />
@@ -122,5 +125,4 @@ export default function LotteryEntrance() {
     </div>
 }
 
-//TODO: raffle balance
 //TODO: Liston to contract events and update the ui accordingly
