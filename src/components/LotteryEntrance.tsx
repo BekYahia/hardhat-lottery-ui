@@ -24,11 +24,50 @@ export default function LotteryEntrance() {
     const [recentWinner, setRecentWinner] = useState("")
     const [raffleState, setRaffleState] = useState(0)
     const [raffleBalance, setRaffleBalance] = useState("0")
-
+    
     useEffect(() => {
         if(!isWeb3Enabled || !raffleAddress) return
+        
         updateUI()
+        const contract = raffleEvents()
+
+        return () => {
+            contract.then(e => e.removeAllListeners())
+        }
+
     }, [isWeb3Enabled, chainId])
+    
+
+    async function raffleEvents() {
+        const startBlockNumber = (await web3?.getBlockNumber())!
+        const eth = Moralis.web3Library
+        const contract = new eth.Contract(raffleAddress!, abi, web3?.getSigner())
+
+        contract.on('RaffleEnter', (_event, listener) => {
+            if(listener.blockNumber <= startBlockNumber) return
+
+            handleNotification({
+                type: "success",
+                message: `Welcome to Raffle: ${listener.args.player}`,
+            })
+            updateUI()
+            console.log("RaffleEnter", listener)
+        })
+        contract.on("WinnerPicked",  (_event, listener) => {
+            if(listener.blockNumber <= startBlockNumber) return
+
+            handleNotification({
+                type: "success",
+                title: "Raffle Winner",
+                message: `The Raffle winner is ${listener.args.winner}`,
+            })
+            updateUI()
+            console.log("WinnerPicked", listener)
+        })
+
+        return contract;
+    }
+
 
     /* View Functions */
     const contractAttributes = {
@@ -62,7 +101,7 @@ export default function LotteryEntrance() {
         await tx.wait(1)
         handleNotification({
             type: "success",
-            message: "Transaction Send!",
+            message: "Transaction Send, wait or confirmation!",
         })
         updateUI()
     }
@@ -118,5 +157,3 @@ export default function LotteryEntrance() {
         : <p> Not supported Network <code className="font-semibold">{chainIdHex && parseInt(chainIdHex!)}</code>, use <code className="font-semibold">{ Object.keys(addresses) }</code> instead. </p>}
     </div>
 }
-
-//TODO: Liston to contract events and update the ui accordingly
